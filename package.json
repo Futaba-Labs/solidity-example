@@ -5,6 +5,11 @@
   "repository": "https://github.com/adachi-440/solidity-template.git",
   "author": "adachi_440 <tomoki1999314@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "build": "hardhat compile",
+    "test": "hardhat test",
+    "deploy-goerli": "hardhat run --network goerli scripts/deploy.ts"
+  },
   "devDependencies": {
     "@ethersproject/abi": "^5.4.7",
     "@ethersproject/providers": "^5.4.7",
