@@ -21,19 +21,9 @@ const config: HardhatUserConfig = {
       url: `https://eth-goerli.g.alchemy.com/v2/${process.env.ETHEREUM_GOERLI_API_KEY}`,
       accounts
     },
-    moonbase: {
-      chainId: 1287,
-      url: `https://moonbase-alpha.blastapi.io/${process.env.MOONBASE_API_KEY}`,
-      accounts
-    },
     "optimism-goerli": {
       chainId: 420,
       url: `https://opt-goerli.g.alchemy.com/v2/${process.env.OPTIMISM_GOERLI_API_KEY}`,
-      accounts
-    },
-    "arbitrum-goerli": {
-      chainId: 421613,
-      url: `https://arb-goerli.g.alchemy.com/v2/${process.env.ARBITRUM_GOERLI_API_KEY}`,
       accounts
     }
   },
