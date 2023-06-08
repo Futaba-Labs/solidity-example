@@ -1,7 +1,7 @@
 {
   "mumbai": {
-    "gateway": "0xa7A3211E91D9C34D6D60455e308682ebe40660d9",
-    "light_client": "0x20DBabD0123181cB293e581621829Da09Ab4583d"
+    "gateway": "0x845367F671fab42B7Da340426bE801DFB6315bdD",
+    "light_client": "0x7108aD108399ccF6E219D61Df0693E2103A4D8cA"
   },
   "goerli": {
     "gateway": "",

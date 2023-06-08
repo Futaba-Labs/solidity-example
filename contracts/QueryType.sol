@@ -10,21 +10,4 @@ contract QueryType {
         // storage slot
         bytes32 slot;
     }
-
-    struct OracleQuery {
-        uint32 dstChainId;
-        uint256 height;
-    }
-
-    struct OracleResponse {
-        uint32 dstChainId;
-        uint256 height;
-        // state root
-        bytes32 root;
-    }
-
-    struct QueryResponse {
-        bytes32 queryId;
-        bytes proof;
-    }
 }

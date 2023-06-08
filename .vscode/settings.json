@@ -8,5 +8,11 @@
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true
     }
-  }
+  },
+  "solidity.remappingsUnix": [
+    "@openzeppelin/=node_modules/@openzeppelin/",
+    "@gelatonetwork/=node_modules/@gelatonetwork/",
+    "hardhat/=node_modules/hardhat/",
+    "@chainlink/=node_modules/@chainlink/"
+  ]
 }

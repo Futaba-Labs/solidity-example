@@ -7,7 +7,7 @@ import { QueryType } from "../typechain-types/contracts/BalanceQuery";
 const relay = new GelatoRelay();
 
 async function main() {
-  const balanceQuery = await ethers.getContractAt("BalanceQuery", "0x57681E858F4F3FcDa84Bb5d6304aD3D90567Cc2a")
+  const balanceQuery = await ethers.getContractAt("BalanceQuery", "0x37954d3A6F04F6185aC03A14F21f24B1F854284F")
 
   const slot = concat([
     // Mappings' keys in Solidity must all be word-aligned (32 bytes)
