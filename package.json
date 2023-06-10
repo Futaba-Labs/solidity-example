@@ -11,7 +11,8 @@
     "deploy:goerli": "hardhat run --network goerli scripts/deploy.ts",
     "deploy:balance": "hardhat run scripts/deploy.ts",
     "deploy:custom": "hardhat run scripts/deployCustomQuery.ts",
-    "query:mumbai": "hardhat run --network mumbai scripts/requestQuery.ts"
+    "query:balance": "hardhat run scripts/requestQuery.ts",
+    "query:custom": "hardhat run scripts/requestCustomQuery.ts"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.4.7",
