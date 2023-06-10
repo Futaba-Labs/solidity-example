@@ -1,0 +1,69 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.9;
+
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "./QueryType.sol";
+import "./IReceiver.sol";
+import "./IGateway.sol";
+
+/**
+ * @title CustomQuery
+ * @notice The contarct that can execute arbitrary queries
+ */
+
+contract CustomQuery is IReceiver {
+    IGateway public gateway;
+    address public lightClient;
+
+    event QueryExecuted(
+        bytes32 indexed queryId,
+        address indexed sender,
+        bytes[] results,
+        QueryType.QueryRequest[] queries
+    );
+
+    constructor(address _gateway, address _lightClient) {
+        gateway = IGateway(_gateway);
+        lightClient = _lightClient;
+    }
+
+    function query(QueryType.QueryRequest[] memory queries) public payable {
+        // Encode the decimal number of the token and the address to mint the token
+        bytes memory message = abi.encode(msg.sender);
+
+        // Check to see if fee has been sent
+        require(msg.value > 0, "Insufficient fee");
+
+        // Execute query from gateway contract
+        gateway.query{value: msg.value}(
+            queries,
+            lightClient,
+            address(this),
+            message
+        );
+    }
+
+    function receiveQuery(
+        bytes32 queryId,
+        bytes[] memory results,
+        QueryType.QueryRequest[] memory queries,
+        bytes memory message
+    ) external onlyGateway {
+        address sender = abi.decode(message, (address));
+        emit QueryExecuted(queryId, sender, results, queries);
+    }
+
+    function getCache(
+        QueryType.QueryRequest[] memory queries
+    ) public view returns (bytes[] memory) {
+        return gateway.getCache(queries);
+    }
+
+    modifier onlyGateway() {
+        require(
+            msg.sender == address(gateway),
+            "Only gateway can call this function"
+        );
+        _;
+    }
+}

@@ -9,7 +9,8 @@
     "build": "hardhat compile",
     "test": "hardhat test",
     "deploy:goerli": "hardhat run --network goerli scripts/deploy.ts",
-    "deploy:mumbai": "hardhat run --network mumbai scripts/deploy.ts",
+    "deploy:balance": "hardhat run scripts/deploy.ts",
+    "deploy:custom": "hardhat run scripts/deployCustomQuery.ts",
     "query:mumbai": "hardhat run --network mumbai scripts/requestQuery.ts"
   },
   "devDependencies": {

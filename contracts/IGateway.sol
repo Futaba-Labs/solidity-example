@@ -23,4 +23,8 @@ interface IGateway {
         address callBack,
         bytes calldata message
     ) external payable;
+
+    function getCache(
+        QueryType.QueryRequest[] memory queries
+    ) external view returns (bytes[] memory);
 }
