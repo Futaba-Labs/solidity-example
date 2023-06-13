@@ -25,6 +25,11 @@ const config: HardhatUserConfig = {
       chainId: 420,
       url: `https://opt-goerli.g.alchemy.com/v2/${process.env.OPTIMISM_GOERLI_API_KEY}`,
       accounts
+    },
+    "arbitrum-goerli": {
+      chainId: 421613,
+      url: `https://arb-goerli.g.alchemy.com/v2/${process.env.ARBITRUM_GOERLI_API_KEY}`,
+      accounts
     }
   },
 };
