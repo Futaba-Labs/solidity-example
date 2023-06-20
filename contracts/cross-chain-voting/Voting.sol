@@ -62,6 +62,7 @@ contract Voting is Ownable, IReceiver {
         string description;
         address[] voters;
         uint256 expirationTime;
+        uint256 height;
         Voter[] voterInfo;
     }
 
@@ -279,6 +280,7 @@ contract Voting is Ownable, IReceiver {
                 pro.description,
                 pro.voters,
                 pro.expirationTime,
+                pro.height,
                 voters
             );
         }
@@ -306,6 +308,7 @@ contract Voting is Ownable, IReceiver {
             pro.description,
             pro.voters,
             pro.expirationTime,
+            pro.height,
             voters
         );
 
