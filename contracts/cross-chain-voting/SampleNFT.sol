@@ -3,26 +3,28 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract SampleNFT is ERC721, ERC721URIStorage, Ownable {
+contract SampleNFT is ERC721, ERC721URIStorage {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
 
-    constructor() ERC721("Futaba NFT", "FNFT") {}
+    string private uri;
 
-    function _baseURI() internal pure override returns (string memory) {
-        return
-            "https://ipfs.io/ipfs/QmfJ6Cteio9Xe1HN6XF4s6XTquN5iUXn2sCTXyUy6TpEed?filename=futaba_512.png";
+    constructor(string memory _uri) ERC721("Futaba NFT", "FNFT") {
+        uri = _uri;
     }
 
-    function safeMint(address to, string memory uri) public onlyOwner {
+    function _baseURI() internal view override returns (string memory) {
+        return uri;
+    }
+
+    function safeMint(address to) external {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
-        _setTokenURI(tokenId, uri);
+        _setTokenURI(tokenId, _baseURI());
     }
 
     // The following functions are overrides required by Solidity.

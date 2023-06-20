@@ -19,7 +19,8 @@
     "mint": "hardhat TASK_MINT_SAMPLE_NFT",
     "proposal": "hardhat TASK_CREATE_PROPOSAL",
     "vote": "hardhat TASK_VOTE",
-    "get-proposal": "hardhat TASK_GET_PROPOSAL"
+    "get-proposal": "hardhat TASK_GET_PROPOSAL",
+    "verify": "hardhat TASK_VERIFY"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.4.7",
