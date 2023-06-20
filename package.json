@@ -11,9 +11,15 @@
     "deploy:goerli": "hardhat run --network goerli scripts/deploy.ts",
     "deploy:balance": "hardhat run scripts/deploy.ts",
     "deploy:custom": "hardhat run scripts/deployCustomQuery.ts",
+    "deploy:voting": "hardhat run scripts/deployVoting.ts",
+    "deploy:nft": "hardhat run scripts/deploySampleNFT.ts",
     "deploy:token": "hardhat run scripts/deployTestToken.ts",
     "query:balance": "hardhat run scripts/requestQuery.ts",
-    "query:custom": "hardhat run scripts/requestCustomQuery.ts"
+    "query:custom": "hardhat run scripts/requestCustomQuery.ts",
+    "mint": "hardhat TASK_MINT_SAMPLE_NFT",
+    "proposal": "hardhat TASK_CREATE_PROPOSAL",
+    "vote": "hardhat TASK_VOTE",
+    "get-proposal": "hardhat TASK_GET_PROPOSAL"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.4.7",
