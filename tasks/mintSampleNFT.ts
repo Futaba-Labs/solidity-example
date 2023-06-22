@@ -11,7 +11,7 @@ task("TASK_MINT_SAMPLE_NFT", "Mint sample NFT")
       const uri = taskArgs.uri || "https://ipfs.io/ipfs/QmfJ6Cteio9Xe1HN6XF4s6XTquN5iUXn2sCTXyUy6TpEed?filename=futaba_512.png";
       try {
         console.log(`mint new NFT...`)
-        let tx = await (await sampleNFT.safeMint(to, uri, { gasLimit: 2000000 })).wait()
+        let tx = await (await sampleNFT.safeMint(to, { gasLimit: 2000000 })).wait()
         console.log(`✅ [${hre.network.name}] safeMint(${to}, ${uri})`)
         console.log(` tx: ${tx.transactionHash}`)
 

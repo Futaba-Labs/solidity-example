@@ -90,7 +90,7 @@ contract Voting is Ownable, IReceiver {
         string calldata _description,
         uint256 _voteExpirationTime,
         uint256 _height
-    ) external onlyOwner returns (uint256) {
+    ) external returns (uint256) {
         require(_voteExpirationTime > 0, "The voting period cannot be 0");
         ProposalCount++;
 
