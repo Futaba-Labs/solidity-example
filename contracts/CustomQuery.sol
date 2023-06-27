@@ -11,7 +11,7 @@ import "./interfaces/IGateway.sol";
  * @notice The contarct that can execute arbitrary queries
  */
 
-contract CustomQuery is IReceiver {
+contract CustomQuery is IReceiver, Ownable {
     IGateway public gateway;
     address public lightClient;
 
@@ -57,6 +57,20 @@ contract CustomQuery is IReceiver {
         QueryType.QueryRequest[] memory queries
     ) public view returns (bytes[] memory) {
         return gateway.getCache(queries);
+    }
+
+    /** @notice Set gateway contract address
+     * @param _gateway Gateway contract address
+     */
+    function setGateway(address _gateway) public onlyOwner {
+        gateway = IGateway(_gateway);
+    }
+
+    /** @notice Set light client contract address
+     * @param _lightClient Light client contract address
+     */
+    function setLightClient(address _lightClient) public onlyOwner {
+        lightClient = _lightClient;
     }
 
     modifier onlyGateway() {

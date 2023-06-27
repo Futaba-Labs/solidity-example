@@ -16,14 +16,14 @@ contract BalanceQuery is Ownable, ERC20, IReceiver {
     address public gateway;
 
     // Address of contract to verify storage proof
-    address public ligthClient;
+    address public lightClient;
 
     constructor(
         address _gateway,
         address _lightClient
     ) ERC20("Futaba Test Token", "FTB") {
         gateway = _gateway;
-        ligthClient = _lightClient;
+        lightClient = _lightClient;
     }
 
     /** @notice Query execution via gateway contract
@@ -43,7 +43,7 @@ contract BalanceQuery is Ownable, ERC20, IReceiver {
         // Execute query from gateway contract
         IGateway(gateway).query{value: msg.value}(
             queries,
-            ligthClient,
+            lightClient,
             address(this), // callback address
             message
         );
@@ -79,6 +79,20 @@ contract BalanceQuery is Ownable, ERC20, IReceiver {
             amount += balance * (10 ** (18 - decimal));
         }
         _mint(sender, amount);
+    }
+
+    /** @notice Set gateway contract address
+     * @param _gateway Gateway contract address
+     */
+    function setGateway(address _gateway) public onlyOwner {
+        gateway = _gateway;
+    }
+
+    /** @notice Set light client contract address
+     * @param _lightClient Light client contract address
+     */
+    function setLightClient(address _lightClient) public onlyOwner {
+        lightClient = _lightClient;
     }
 
     /** @notice Allow data to be received only from gateway contract

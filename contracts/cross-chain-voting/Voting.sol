@@ -21,7 +21,7 @@ contract Voting is Ownable, IReceiver {
     address public gateway;
 
     // Address of contract to verify storage proof
-    address public ligthClient;
+    address public lightClient;
 
     event VoteCasted(address voter, uint256 ProposalID, uint256 weight);
 
@@ -77,7 +77,7 @@ contract Voting is Ownable, IReceiver {
 
     constructor(address _gateway, address _lightClient) {
         gateway = _gateway;
-        ligthClient = _lightClient;
+        lightClient = _lightClient;
     }
 
     /**
@@ -211,7 +211,7 @@ contract Voting is Ownable, IReceiver {
         bytes memory message = abi.encode(msg.sender, _ProposalID, _vote);
         IGateway(gateway).query{value: msg.value}(
             queries,
-            ligthClient,
+            lightClient,
             address(this), // callback address
             message
         );
@@ -313,6 +313,20 @@ contract Voting is Ownable, IReceiver {
         );
 
         return proposal;
+    }
+
+    /** @notice Set gateway contract address
+     * @param _gateway Gateway contract address
+     */
+    function setGateway(address _gateway) public onlyOwner {
+        gateway = _gateway;
+    }
+
+    /** @notice Set light client contract address
+     * @param _lightClient Light client contract address
+     */
+    function setLightClient(address _lightClient) public onlyOwner {
+        lightClient = _lightClient;
     }
 
     function _checkVoteStatus(
