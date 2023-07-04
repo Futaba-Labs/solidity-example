@@ -29,7 +29,7 @@ contract CustomQuery is IReceiver, Ownable {
 
     function query(QueryType.QueryRequest[] memory queries) public payable {
         // Encode the decimal number of the token and the address to mint the token
-        bytes memory message = abi.encode(msg.sender);
+        bytes memory message = abi.encodePacked(msg.sender);
 
         // Check to see if fee has been sent
         require(msg.value > 0, "Insufficient fee");

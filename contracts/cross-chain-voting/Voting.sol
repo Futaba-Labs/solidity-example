@@ -208,7 +208,7 @@ contract Voting is Ownable, IReceiver {
             QueryType.QueryRequest memory query = queries[i];
             query.height = Proposals[_ProposalID].height;
         }
-        bytes memory message = abi.encode(msg.sender, _ProposalID, _vote);
+        bytes memory message = abi.encodePacked(msg.sender, _ProposalID, _vote);
         IGateway(gateway).query{value: msg.value}(
             queries,
             lightClient,
