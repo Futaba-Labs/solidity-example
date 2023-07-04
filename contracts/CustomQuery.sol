@@ -27,6 +27,11 @@ contract CustomQuery is IReceiver, Ownable {
         lightClient = _lightClient;
     }
 
+    /**
+     * @notice Query execution via gateway contract
+     * @param queries Information for doing a query, see QueryType.sol
+     */
+
     function query(QueryType.QueryRequest[] memory queries) public payable {
         // Encode the decimal number of the token and the address to mint the token
         bytes memory message = abi.encodePacked(msg.sender);
@@ -43,6 +48,13 @@ contract CustomQuery is IReceiver, Ownable {
         );
     }
 
+    /**
+     * @notice Receive query results
+     * @param queryId Unique id that can refer to query results, etc.
+     * @param results Results of query in byte format
+     * @param queries Information for doing a query, see QueryType.sol
+     * @param message Encoded data for non-query use
+     */
     function receiveQuery(
         bytes32 queryId,
         bytes[] memory results,
@@ -52,6 +64,12 @@ contract CustomQuery is IReceiver, Ownable {
         address sender = abi.decode(message, (address));
         emit QueryExecuted(queryId, sender, results, queries);
     }
+
+    /**
+     * @notice Get cache from gateway contract
+     * @param queries Information for doing a query, see QueryType.sol
+     * @return results Results of query in byte format
+     */
 
     function getCache(
         QueryType.QueryRequest[] memory queries
@@ -73,6 +91,9 @@ contract CustomQuery is IReceiver, Ownable {
         lightClient = _lightClient;
     }
 
+    /**
+     * @notice checks if request is from gateway
+     */
     modifier onlyGateway() {
         require(
             msg.sender == address(gateway),

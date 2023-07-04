@@ -197,6 +197,12 @@ contract Voting is Ownable, IReceiver {
         return (yesVotes, noVotes);
     }
 
+    /**
+     * @notice query Ethereum NFT data
+     * @param queries array of QueryType.QueryRequest
+     * @param _ProposalID the proposal id
+     * @param _vote yes or no
+     */
     function queryNFT(
         QueryType.QueryRequest[] memory queries,
         uint256 _ProposalID,
@@ -216,6 +222,12 @@ contract Voting is Ownable, IReceiver {
             message
         );
     }
+
+    /**
+     * @notice receive query response from Ethereum (if user has Ethereum NFT)
+     * @param results array of bytes
+     * @param message byte data stored in request
+     */
 
     function receiveQuery(
         bytes32,
@@ -262,6 +274,11 @@ contract Voting is Ownable, IReceiver {
         emit VoteCasted(_voter, _ProposalID, weight);
     }
 
+    /**
+     * @notice get all proposals
+     * @return array of ProposalData
+     */
+
     function getAllProposals() external view returns (ProposalData[] memory) {
         ProposalData[] memory proposals = new ProposalData[](ProposalCount);
         for (uint256 i = 1; i < ProposalCount + 1; i++) {
@@ -288,6 +305,11 @@ contract Voting is Ownable, IReceiver {
         return proposals;
     }
 
+    /**
+     * @notice get proposal by id
+     * @param id proposal id
+     * @return ProposalData
+     */
     function getProposal(
         uint256 id
     ) external view returns (ProposalData memory) {
@@ -329,6 +351,10 @@ contract Voting is Ownable, IReceiver {
         lightClient = _lightClient;
     }
 
+    /**
+     * @notice checks if a proposal id is valid
+     * @param _ProposalID the proposal id
+     */
     function _checkVoteStatus(
         uint256 _ProposalID,
         address _voter
@@ -371,6 +397,9 @@ contract Voting is Ownable, IReceiver {
         _;
     }
 
+    /**
+     * @notice checks if request is from gateway
+     */
     modifier onlyGateway() {
         require(msg.sender == gateway, "Only gateway can call this function");
         _;
