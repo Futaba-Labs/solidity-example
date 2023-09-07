@@ -20,7 +20,8 @@
     "proposal": "hardhat TASK_CREATE_PROPOSAL",
     "vote": "hardhat TASK_VOTE",
     "get-proposal": "hardhat TASK_GET_PROPOSAL",
-    "verify": "hardhat TASK_VERIFY"
+    "verify": "hardhat TASK_VERIFY",
+    "set-gateway": "hardhat TASK_SET_GATEWAY"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.4.7",

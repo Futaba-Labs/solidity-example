@@ -1,18 +1,30 @@
 {
   "mumbai": {
-    "gateway": "0x143dEB1202e8e4C60a58a7C476ef664Fcaf12F90",
-    "light_client": "0xA171Ec7644385e3dcc5A68af62E6c317f210c7b9"
+    "gateway": "0x3fab87824ABbe2DC686ed5CbB032d9c62E2fe179",
+    "light_client": "0xA171Ec7644385e3dcc5A68af62E6c317f210c7b9",
+    "balance": "0x980C6C355CFBb16420e8Af169F7a3F1310090E10",
+    "custom": "0xbc1bbd63D6cff2DC985F1DE0b166aA39F8a86E3C",
+    "voting": "0x462D421c1a174AF3f76C6072123Afb6aA7202F25"
   },
   "goerli": {
     "gateway": "",
-    "light_client": ""
+    "light_client": "",
+    "balance": "",
+    "custom": "",
+    "voting": ""
   },
   "optimism-goerli": {
     "gateway": "",
-    "light_client": ""
+    "light_client": "",
+    "balance": "",
+    "custom": "",
+    "voting": ""
   },
   "arbitrum-goerli": {
     "gateway": "",
-    "light_client": ""
+    "light_client": "",
+    "balance": "",
+    "custom": "",
+    "voting": ""
   }
 }
