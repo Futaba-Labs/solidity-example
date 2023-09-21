@@ -2,7 +2,6 @@ import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import * as dotenv from 'dotenv';
 import "./tasks/index";
-import "@nomicfoundation/hardhat-foundry";
 
 dotenv.config();
 const accounts =
