@@ -1,12 +1,12 @@
 import { task, types } from "hardhat/config";
-import VOTING from "../constants/voting.json";
+import DEPLOYMENT from "../constants/deployment.json";
 
 task("TASK_GET_PROPOSAL", "Create prposal for voting")
   .addParam<number>("proposalid", "Proposal title", 0, types.int)
   .setAction(
     async (taskArgs, hre): Promise<null> => {
       const prposalId = taskArgs["proposalid"]
-      const votingAddress = VOTING[hre.network.name as keyof typeof VOTING]
+      const votingAddress = DEPLOYMENT[hre.network.name as keyof typeof DEPLOYMENT].voting
       const voting = await hre.ethers.getContractAt("Voting", votingAddress);
       try {
         const proposal = await voting.getProposal(prposalId)

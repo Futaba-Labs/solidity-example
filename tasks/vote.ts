@@ -1,5 +1,5 @@
 import { task, types } from "hardhat/config";
-import VOTING from "../constants/voting.json";
+import DEPLOYMENT from "../constants/deployment.json";
 import { QueryType } from "../typechain-types/contracts/cross-chain-voting/Voting";
 import { GelatoRelay } from "@gelatonetwork/relay-sdk";
 
@@ -15,7 +15,7 @@ task("TASK_VOTE", "Create prposal for voting")
         nftAddress = taskArgs["nftaddress"],
         vote = taskArgs["vote"]
 
-      const votingAddress = VOTING[hre.network.name as keyof typeof VOTING]
+      const votingAddress = DEPLOYMENT[hre.network.name as keyof typeof DEPLOYMENT].voting
       const voting = await hre.ethers.getContractAt("Voting", votingAddress);
       const [owner] = await hre.ethers.getSigners();
       const queries: QueryType.QueryRequestStruct[] = [
