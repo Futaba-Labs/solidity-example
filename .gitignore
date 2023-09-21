@@ -10,3 +10,5 @@ cache
 artifacts
 yarn.lock
 
+# .vscode
+.vscode
