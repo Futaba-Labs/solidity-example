@@ -1,7 +1,7 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Deployment } from "./types";
 import fs from 'fs';
-const FILE_PATH = "../../constants/deployment.json"
+const FILE_PATH = "./constants/deployment.json"
 
 export const deploy = async (hre: HardhatRuntimeEnvironment, contractName: string, constructorArgs: any[], verify: boolean): Promise<string> => {
   const TargetContract = await hre.ethers.getContractFactory(contractName);

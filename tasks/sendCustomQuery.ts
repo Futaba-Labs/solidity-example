@@ -1,6 +1,8 @@
 import { task, types } from "hardhat/config";
 import { getDeployments } from "./utils/deploy";
 import { QueryType } from "../typechain-types/contracts/CustomQuery";
+import { ChainId, ChainStage, FutabaGateway, FutabaQueryAPI } from "@futaba-lab/sdk";
+import { getQueryId } from "./utils";
 
 task("TASK_SEND_CUSTOM_QUERY", "send custom query")
   .addParam<string>("params",
@@ -9,19 +11,29 @@ task("TASK_SEND_CUSTOM_QUERY", "send custom query")
   .setAction(
     async (taskArgs, hre): Promise<null> => {
       const deployment = await getDeployments(hre.network.name)
-      const customQuery = await hre.ethers.getContractAt("CustomQuery", deployment.balance);
+      const customQuery = await hre.ethers.getContractAt("CustomQuery", deployment.custom);
       const queryRequests: QueryType.QueryRequestStruct[] = JSON.parse(taskArgs.params)
 
-      // TODO get estimated fee from SDK
-      const fee = 0
+      const queryAPI = new FutabaQueryAPI(ChainStage.TESTNET, ChainId.MUMBAI)
+
+      // @ts-ignore
+      const fee = await queryAPI.estimateFee(queryRequests)
       console.log(`fee: ${fee}`)
 
       try {
         console.log(`Sending query...`)
         const tx = await customQuery.query(queryRequests, { gasLimit: 3000000, value: fee })
-        await tx.wait()
+        const resTx = await tx.wait()
         console.log("Query sent!")
         console.log(`tx: ${tx.hash}`)
+
+        console.log(`Waiting for query result...`)
+        const queryId = getQueryId(resTx)
+        const [signer] = await hre.ethers.getSigners()
+        const futabaGateway = new FutabaGateway(ChainStage.TESTNET, ChainId.MUMBAI, signer)
+        const res = await futabaGateway.waitForQueryResult(queryId)
+        console.log("Query result is received!")
+        console.log(`result: ${res}`)
       } catch (e: any) {
         if (e.error.message.includes("The chainId + address is already trusted")) {
           console.log("*source already set*")
@@ -31,7 +43,6 @@ task("TASK_SEND_CUSTOM_QUERY", "send custom query")
         }
       }
 
-      // TODO wait for response
       return null;
     }
   );

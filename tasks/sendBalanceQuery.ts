@@ -1,5 +1,7 @@
 import { task, types } from "hardhat/config";
-import { getDeployments } from "./utils/deploy";
+import { getDeployments, getQueryId } from "./utils";
+import { FutabaQueryAPI, ChainStage, ChainId, FutabaGateway, QueryRequest } from "@futaba-lab/sdk";
+import { QueryType } from "../typechain-types/contracts/BalanceQuery";
 
 interface Param {
   dstChainId: number,
@@ -15,6 +17,7 @@ task("TASK_SEND_BALANCE_QUERY", "send balance query")
       const deployment = await getDeployments(hre.network.name)
       const balanceQuery = await hre.ethers.getContractAt("BalanceQuery", deployment.balance);
       const params: Param[] = JSON.parse(taskArgs.params)
+      const queryRequests: QueryType.QueryRequestStruct[] = []
 
       // TODO calc decimals
 
@@ -22,19 +25,32 @@ task("TASK_SEND_BALANCE_QUERY", "send balance query")
 
       // TODO format query requests
 
-      // TODO get estimated fee
-      const fee = 0
+      const queryAPI = new FutabaQueryAPI(ChainStage.TESTNET, ChainId.MUMBAI)
+
+      // @ts-ignore
+      const fee = await queryAPI.estimateFee(queryRequests)
       console.log(`fee: ${fee}`)
 
       try {
-        const tx = await balanceQuery.sendQuery(params, [], { gasLimit: 2000000, value: fee })
+        console.log(`Sending query...`)
+        const tx = await balanceQuery.sendQuery(queryRequests, [], { gasLimit: 3000000, value: fee })
+        const resTx = await tx.wait()
+        console.log("Query sent!")
+        console.log(`tx: ${tx.hash}`)
 
+        console.log(`Waiting for query result...`)
+        const queryId = getQueryId(resTx)
+        const [signer] = await hre.ethers.getSigners()
+        const futabaGateway = new FutabaGateway(ChainStage.TESTNET, ChainId.MUMBAI, signer)
+        const res = await futabaGateway.waitForQueryResult(queryId)
+        console.log("Query result is received!")
+        console.log(`result: ${res}`)
       } catch (e: any) {
         if (e.error.message.includes("The chainId + address is already trusted")) {
           console.log("*source already set*")
         } else {
           console.log(e)
-          console.log(`❌ [${hre.network.name}] sendQuery(${gateway})`)
+          console.log(`❌ [${hre.network.name}] query(${JSON.stringify(queryRequests)})`)
         }
       }
       return null;
