@@ -14,7 +14,7 @@ task("TASK_DEPLOY_VOTING", "Deploy Voting contract")
       const deployedAddress = await deploy(hre, "Voting", [gateway, lightClient], taskArgs.verify)
       deployment.voting = deployedAddress
 
-      setDeployments(deployment)
+      await setDeployments(hre.network, deployment)
 
       console.log("Voting address saved to deployment.json");
       console.log("Voting depolyment is Done!");

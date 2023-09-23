@@ -14,7 +14,7 @@ task("TASK_DEPLOY_BALANCE_QUERY", "Deploy BalanceQuery contract")
       const deployedAddress = await deploy(hre, "BalanceQuery", [gateway, lightClient], taskArgs.verify)
       deployment.balance = deployedAddress
 
-      setDeployments(deployment)
+      await setDeployments(hre.network, deployment)
 
       console.log("BalanceQuery address saved to deployment.json");
       console.log("BalanceQuery depolyment is Done!");

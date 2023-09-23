@@ -23,7 +23,7 @@ export const deploy = async (hre: HardhatRuntimeEnvironment, contractName: strin
 
     await hre.run("TASK_VERIFY", {
       address: targetContract.address,
-      constructorArguments: constructorArgs
+      arguments: constructorArgs
     });
   }
 
@@ -41,6 +41,9 @@ export const getDeployments = async (network: Network, chainStage: ChainStage): 
   return deployment;
 }
 
-export const setDeployments = async (deployment: Deployment) => {
-  fs.writeFileSync(FILE_PATH, JSON.stringify(deployment))
+export const setDeployments = async (network: Network, newDeployment: Deployment) => {
+  const data = await fs.promises.readFile(FILE_PATH, 'utf8');
+  const oldDeployment = JSON.parse(data.toString());
+  oldDeployment[network.name] = newDeployment
+  fs.writeFileSync(FILE_PATH, JSON.stringify(oldDeployment))
 }

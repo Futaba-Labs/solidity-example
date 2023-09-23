@@ -1,5 +1,4 @@
 import { task, types } from "hardhat/config";
-import DEPLOYMENT from "../constants/deployment.json";
 import { getDeployments } from "./utils";
 import { ChainStage } from "@futaba-lab/sdk";
 

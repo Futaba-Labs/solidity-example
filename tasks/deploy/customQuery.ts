@@ -14,7 +14,7 @@ task("TASK_DEPLOY_CUSTOM_QUERY", "Deploy CustomQuery contract")
       const deployedAddress = await deploy(hre, "CustomQuery", [gateway, lightClient], taskArgs.verify)
 
       deployment.custom = deployedAddress
-      setDeployments(deployment)
+      await setDeployments(hre.network, deployment)
 
       console.log("CustomQuery address saved to deployment.json");
       console.log("CustomQuery depolyment is Done!");
