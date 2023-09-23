@@ -1,6 +1,7 @@
-import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { HardhatRuntimeEnvironment, Network } from "hardhat/types";
 import { Deployment } from "./types";
 import fs from 'fs';
+import { ChainStage, GATEWAY, LIGHT_CLIENT, getChainKey } from "@futaba-lab/sdk";
 const FILE_PATH = "./constants/deployment.json"
 
 export const deploy = async (hre: HardhatRuntimeEnvironment, contractName: string, constructorArgs: any[], verify: boolean): Promise<string> => {
@@ -29,10 +30,15 @@ export const deploy = async (hre: HardhatRuntimeEnvironment, contractName: strin
   return targetContract.address
 }
 
-export const getDeployments = async (network: string): Promise<Deployment> => {
+export const getDeployments = async (network: Network, chainStage: ChainStage): Promise<Deployment> => {
   const data = await fs.promises.readFile(FILE_PATH, 'utf8');
-  const deployment = JSON.parse(data.toString());
-  return deployment[network];
+  const deployment = JSON.parse(data.toString())[network.name];
+  const chainKey = getChainKey(network.config.chainId!)
+  const gateway = GATEWAY[chainStage][chainKey]
+  const lightClient = LIGHT_CLIENT[chainStage][chainKey]
+  deployment.gateway = gateway
+  deployment.light_client = lightClient
+  return deployment;
 }
 
 export const setDeployments = async (deployment: Deployment) => {

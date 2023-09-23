@@ -5,12 +5,13 @@ import { ChainId, ChainStage, FutabaGateway, FutabaQueryAPI } from "@futaba-lab/
 import { getQueryId } from "./utils";
 
 task("TASK_SEND_CUSTOM_QUERY", "send custom query")
+  .addParam<boolean>("mainnet", "mainnet", false, types.boolean)
   .addParam<string>("params",
     'Parameters for requesting query\nExample: [{dstChainId: 5, height: 8000000, to: "0xA2025B15a1757311bfD68cb14eaeFCc237AF5b43", slot: "0x0"}]',
     "", types.string)
   .setAction(
     async (taskArgs, hre): Promise<null> => {
-      const deployment = await getDeployments(hre.network.name)
+      const deployment = await getDeployments(hre.network, taskArgs.mainnet ? ChainStage.MAINNET : ChainStage.TESTNET)
       const customQuery = await hre.ethers.getContractAt("CustomQuery", deployment.custom);
       const queryRequests: QueryType.QueryRequestStruct[] = JSON.parse(taskArgs.params)
 
@@ -18,7 +19,7 @@ task("TASK_SEND_CUSTOM_QUERY", "send custom query")
 
       // @ts-ignore
       const fee = await queryAPI.estimateFee(queryRequests)
-      console.log(`fee: ${fee}`)
+      console.log(`Fee: ${fee}`)
 
       try {
         console.log(`Sending query...`)

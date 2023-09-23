@@ -1,12 +1,16 @@
 import { task, types } from "hardhat/config";
 import DEPLOYMENT from "../constants/deployment.json";
+import { getDeployments } from "./utils";
+import { ChainStage } from "@futaba-lab/sdk";
 
 task("TASK_GET_PROPOSAL", "Create prposal for voting")
+  .addParam<boolean>("mainnet", "mainnet", false, types.boolean)
   .addParam<number>("proposalid", "Proposal title", 0, types.int)
   .setAction(
     async (taskArgs, hre): Promise<null> => {
       const prposalId = taskArgs["proposalid"]
-      const votingAddress = DEPLOYMENT[hre.network.name as keyof typeof DEPLOYMENT].voting
+      const deployment = await getDeployments(hre.network, taskArgs.mainnet ? ChainStage.MAINNET : ChainStage.TESTNET)
+      const votingAddress = deployment.voting
       const voting = await hre.ethers.getContractAt("Voting", votingAddress);
       try {
         const proposal = await voting.getProposal(prposalId)

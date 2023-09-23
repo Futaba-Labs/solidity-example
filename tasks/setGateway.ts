@@ -1,11 +1,14 @@
 import { task, types } from "hardhat/config";
 import DEPLOYMENT from "../constants/deployment.json"
+import { getDeployments } from "./utils";
+import { ChainStage } from "@futaba-lab/sdk";
 
 task("TASK_SET_GATEWAY", "Set gateway contract address")
+  .addParam<boolean>("mainnet", "mainnet", false, types.boolean)
   .addParam<string>("gateway", "Gateway contract address", "", types.string)
   .setAction(
     async (taskArgs, hre): Promise<null> => {
-      const deployment = DEPLOYMENT[hre.network.name as keyof typeof DEPLOYMENT]
+      const deployment = await getDeployments(hre.network, taskArgs.mainnet ? ChainStage.MAINNET : ChainStage.TESTNET)
       const gateway = taskArgs.gateway
 
       const balanceQuery = await hre.ethers.getContractAt("BalanceQuery", deployment.balance)
