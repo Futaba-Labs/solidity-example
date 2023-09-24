@@ -1,6 +1,6 @@
 import { task, types } from "hardhat/config";
 import { getDeployments, getQueryId } from "./utils";
-import { FutabaQueryAPI, ChainStage, ChainId, FutabaGateway, QueryRequest, RPCS, getChainKey } from "@futaba-lab/sdk";
+import { FutabaQueryAPI, ChainStage, ChainId, FutabaGateway, QueryRequest, RPCS, getChainKey, getRpc } from "@futaba-lab/sdk";
 import { QueryType } from "../typechain-types/contracts/BalanceQuery";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import ERC20ABI from "./utils/erc20.abi.json";
@@ -26,21 +26,23 @@ task("TASK_SEND_BALANCE_QUERY", "send balance query")
 
       console.log("Formatting query requests...")
       const decimals: number[] = []
+      const [signer] = await hre.ethers.getSigners()
+      console.log(`Signer: ${signer.address}`)
       for (const param of params) {
         const decimal = await getDecimals(param, hre)
         decimals.push(decimal)
         const latestBlockNumber = await getLatestBlockNumber(param, hre)
-        const [signer] = await hre.ethers.getSigners()
 
         const queryRequest: QueryRequest = {
           dstChainId: param.dstChainId,
           to: param.to,
-          height: latestBlockNumber,
+          height: latestBlockNumber - 100,
           slot: calcBalanceSlot(signer.address)
         }
 
         queryRequests.push(queryRequest)
       }
+      console.log(`Decimals: ${JSON.stringify(decimals)}`)
 
       console.log(`Query requests: ${JSON.stringify(queryRequests)}`)
 
@@ -59,11 +61,11 @@ task("TASK_SEND_BALANCE_QUERY", "send balance query")
 
         console.log(`Waiting for query result...`)
         const queryId = getQueryId(resTx)
-        const [signer] = await hre.ethers.getSigners()
         const futabaGateway = new FutabaGateway(ChainStage.TESTNET, ChainId.MUMBAI, signer)
-        const res: any = await futabaGateway.waitForQueryResult(queryId)
+        const { results, response } = await futabaGateway.waitForQueryResult(queryId)
         console.log("Query result is received!")
-        for (const r of res) {
+        console.log(`response: ${response.hash}`)
+        for (const r of results) {
           console.log(`result: ${BigNumber.from(r)}`)
         }
       } catch (e: any) {
@@ -71,7 +73,7 @@ task("TASK_SEND_BALANCE_QUERY", "send balance query")
           console.log("*source already set*")
         } else {
           console.log(e)
-          console.log(`❌ [${hre.network.name}] query(${JSON.stringify(queryRequests)})`)
+          console.log(`❌ [${hre.network.name}] sendQuery(${JSON.stringify(queryRequests)}, ${JSON.stringify(decimals)}})`)
         }
       }
       return null;
@@ -79,8 +81,7 @@ task("TASK_SEND_BALANCE_QUERY", "send balance query")
   );
 
 const getDecimals = async (param: Param, hre: HardhatRuntimeEnvironment): Promise<number> => {
-  const chainKey = getChainKey(param.dstChainId)
-  const rpc = RPCS[ChainStage.TESTNET][chainKey]
+  const rpc = getRpc(ChainStage.TESTNET, param.dstChainId)
   const provider = new hre.ethers.providers.JsonRpcProvider(rpc)
 
   const erc20 = new hre.ethers.Contract(
@@ -98,8 +99,7 @@ const getDecimals = async (param: Param, hre: HardhatRuntimeEnvironment): Promis
 }
 
 const getLatestBlockNumber = async (param: Param, hre: HardhatRuntimeEnvironment): Promise<number> => {
-  const chainKey = getChainKey(param.dstChainId)
-  const rpc = RPCS[ChainStage.TESTNET][chainKey]
+  const rpc = getRpc(ChainStage.TESTNET, param.dstChainId)
   const provider = new hre.ethers.providers.JsonRpcProvider(rpc)
   return await provider.getBlockNumber()
 }

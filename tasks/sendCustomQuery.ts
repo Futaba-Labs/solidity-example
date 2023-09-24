@@ -23,7 +23,7 @@ task("TASK_SEND_CUSTOM_QUERY", "send custom query")
 
       try {
         console.log(`Sending query...`)
-        const tx = await customQuery.query(queryRequests, { gasLimit: 3000000, value: fee })
+        const tx = await customQuery.query(queryRequests, { gasLimit: 1000000, value: fee })
         const resTx = await tx.wait()
         console.log("Query sent!")
         console.log(`tx: ${tx.hash}`)
@@ -32,9 +32,10 @@ task("TASK_SEND_CUSTOM_QUERY", "send custom query")
         const queryId = getQueryId(resTx)
         const [signer] = await hre.ethers.getSigners()
         const futabaGateway = new FutabaGateway(ChainStage.TESTNET, ChainId.MUMBAI, signer)
-        const res = await futabaGateway.waitForQueryResult(queryId)
+        const { results, response } = await futabaGateway.waitForQueryResult(queryId)
         console.log("Query result is received!")
-        console.log(`result: ${res}`)
+        console.log(`response: ${response.hash}`)
+        console.log(`result: ${JSON.stringify(results)}`)
       } catch (e: any) {
         if (e.error.message.includes("The chainId + address is already trusted")) {
           console.log("*source already set*")
