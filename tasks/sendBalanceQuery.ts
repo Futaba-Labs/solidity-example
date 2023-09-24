@@ -1,6 +1,6 @@
 import { task, types } from "hardhat/config";
 import { getDeployments, getQueryId } from "./utils";
-import { FutabaQueryAPI, ChainStage, ChainId, FutabaGateway, QueryRequest, RPCS, getChainKey } from "@futaba-lab/sdk";
+import { FutabaQueryAPI, ChainStage, ChainId, FutabaGateway, QueryRequest, RPCS, getChainKey, getRpc } from "@futaba-lab/sdk";
 import { QueryType } from "../typechain-types/contracts/BalanceQuery";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import ERC20ABI from "./utils/erc20.abi.json";
@@ -79,8 +79,7 @@ task("TASK_SEND_BALANCE_QUERY", "send balance query")
   );
 
 const getDecimals = async (param: Param, hre: HardhatRuntimeEnvironment): Promise<number> => {
-  const chainKey = getChainKey(param.dstChainId)
-  const rpc = RPCS[ChainStage.TESTNET][chainKey]
+  const rpc = getRpc(ChainStage.TESTNET, param.dstChainId)
   const provider = new hre.ethers.providers.JsonRpcProvider(rpc)
 
   const erc20 = new hre.ethers.Contract(
@@ -98,8 +97,7 @@ const getDecimals = async (param: Param, hre: HardhatRuntimeEnvironment): Promis
 }
 
 const getLatestBlockNumber = async (param: Param, hre: HardhatRuntimeEnvironment): Promise<number> => {
-  const chainKey = getChainKey(param.dstChainId)
-  const rpc = RPCS[ChainStage.TESTNET][chainKey]
+  const rpc = getRpc(ChainStage.TESTNET, param.dstChainId)
   const provider = new hre.ethers.providers.JsonRpcProvider(rpc)
   return await provider.getBlockNumber()
 }
