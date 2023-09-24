@@ -25,7 +25,7 @@ const config: HardhatUserConfig = {
     },
     mumbai: {
       chainId: 80001,
-      url: `https://polygon-mumbai.infura.io/v3/${apiKey}`,
+      url: `https://polygon-mumbai.g.alchemy.com/v2/jftN_iqFdrIcs3OWUoqOl3GIndfoFOhn`,
       accounts
     },
     goerli: {
