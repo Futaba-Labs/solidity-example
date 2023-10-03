@@ -9,7 +9,8 @@ import { BigNumber } from "ethers";
 
 interface Param {
   dstChainId: number,
-  to: string
+  to: string,
+  slot: number
 }
 
 task("TASK_SEND_BALANCE_QUERY", "send balance query")
@@ -37,7 +38,7 @@ task("TASK_SEND_BALANCE_QUERY", "send balance query")
           dstChainId: param.dstChainId,
           to: param.to,
           height: latestBlockNumber - 100,
-          slot: calcBalanceSlot(signer.address)
+          slot: calcBalanceSlot(signer.address, param.slot)
         }
 
         queryRequests.push(queryRequest)
@@ -104,9 +105,9 @@ const getLatestBlockNumber = async (param: Param, hre: HardhatRuntimeEnvironment
   return await provider.getBlockNumber()
 }
 
-const calcBalanceSlot = (sender: string) => {
+const calcBalanceSlot = (sender: string, slot: number) => {
   return keccak256(concat([
     hexZeroPad(sender, 32),
-    hexZeroPad(BigNumber.from(0).toHexString(), 32),
+    hexZeroPad(BigNumber.from(slot).toHexString(), 32),
   ]));
 }
