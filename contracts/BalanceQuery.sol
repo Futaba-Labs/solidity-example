@@ -7,6 +7,8 @@ import "./QueryType.sol";
 import "./interfaces/IReceiver.sol";
 import "./interfaces/IGateway.sol";
 
+import "hardhat/console.sol";
+
 /**
  * @title BalanceQuery
  * @notice Example contract to execute and receive queries
@@ -35,7 +37,7 @@ contract BalanceQuery is Ownable, ERC20, IReceiver {
         uint256[] calldata decimals
     ) public payable {
         // Encode the decimal number of the token and the address to mint the token
-        bytes memory message = abi.encodePacked(decimals, msg.sender);
+        bytes memory message = abi.encode(decimals, msg.sender);
 
         // Check to see if fee has been sent
         require(msg.value > 0, "Insufficient fee");
