@@ -10,4 +10,11 @@ contract QueryType {
         // storage slot
         bytes32 slot;
     }
+
+    struct QueryResponse {
+        // Unique id to access query state
+        bytes32 queryId;
+        // Encoded data for verification
+        bytes proof;
+    }
 }
