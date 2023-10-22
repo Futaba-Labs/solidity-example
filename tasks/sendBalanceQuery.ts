@@ -33,14 +33,12 @@ task("TASK_SEND_BALANCE_QUERY", "send balance query")
         const decimal = await getDecimals(param, hre)
         decimals.push(decimal)
         const latestBlockNumber = await getLatestBlockNumber(param, hre)
-
         const queryRequest: QueryRequest = {
           dstChainId: param.dstChainId,
           to: param.to,
-          height: latestBlockNumber - 100,
+          height: latestBlockNumber,
           slot: calcBalanceSlot(signer.address, param.slot)
         }
-
         queryRequests.push(queryRequest)
       }
       console.log(`Decimals: ${JSON.stringify(decimals)}`)
