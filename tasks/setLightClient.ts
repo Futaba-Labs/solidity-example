@@ -7,7 +7,7 @@ task("TASK_SET_LIGHT_CLIENT", "Set gateway contract address")
   .addParam<string>("client", "LightClient contract address", "", types.string)
   .setAction(
     async (taskArgs, hre): Promise<null> => {
-      const deployment = await getDeployments(hre.network, taskArgs.mainnet ? ChainStage.MAINNET : ChainStage.TESTNET)
+      const deployment = await getDeployments(hre.network)
       const lightClient = taskArgs.client
 
       if (!lightClient) throw new Error("LightClient is required")

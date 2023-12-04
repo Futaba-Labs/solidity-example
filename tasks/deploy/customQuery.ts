@@ -7,7 +7,7 @@ task("TASK_DEPLOY_CUSTOM_QUERY", "Deploy CustomQuery contract")
   .addParam<boolean>("verify", "Verify CustomQuery contract", false, types.boolean)
   .setAction(
     async (taskArgs, hre): Promise<null> => {
-      const deployment = await getDeployments(hre.network, taskArgs.mainnet ? ChainStage.MAINNET : ChainStage.TESTNET)
+      const deployment = await getDeployments(hre.network)
       const gateway = deployment.gateway
       const lightClient = deployment.light_client
 

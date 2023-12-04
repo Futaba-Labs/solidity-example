@@ -11,8 +11,6 @@ import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable/acces
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
-import "hardhat/console.sol";
-
 /**
  * @title Gateway contract
  * @notice This contract sends and receives queries
@@ -230,8 +228,6 @@ contract GatewayMock is
     ) external payable nonReentrant {
         uint256 querySize = queries.length;
         if (querySize == 0) revert ZeroQuery();
-
-        console.log("querySize: %s", querySize);
 
         if (callBack == address(0) || lightClient == address(0))
             revert ZeroAddress();

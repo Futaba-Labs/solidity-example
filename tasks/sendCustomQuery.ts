@@ -12,7 +12,7 @@ task("TASK_SEND_CUSTOM_QUERY", "send custom query")
     "", types.string)
   .setAction(
     async (taskArgs, hre): Promise<null> => {
-      const deployment = await getDeployments(hre.network, taskArgs.mainnet ? ChainStage.MAINNET : ChainStage.TESTNET)
+      const deployment = await getDeployments(hre.network)
       const customQuery = await hre.ethers.getContractAt("CustomQuery", deployment.custom);
       const queryRequests: QueryType.QueryRequestStruct[] = JSON.parse(taskArgs.params)
 

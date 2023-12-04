@@ -7,7 +7,7 @@ task("TASK_SET_GATEWAY", "Set gateway contract address")
   .addParam<string>("gateway", "Gateway contract address", "", types.string)
   .setAction(
     async (taskArgs, hre): Promise<null> => {
-      const deployment = await getDeployments(hre.network, taskArgs.mainnet ? ChainStage.MAINNET : ChainStage.TESTNET)
+      const deployment = await getDeployments(hre.network)
       const gateway = taskArgs.gateway
 
       if (!gateway) throw new Error("gateway is required")

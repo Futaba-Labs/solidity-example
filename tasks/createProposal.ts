@@ -11,7 +11,7 @@ task("TASK_CREATE_PROPOSAL", "Create prposal for voting")
   .setAction(
     async (taskArgs, hre): Promise<null> => {
       let { title, description, expire, height } = taskArgs;
-      const deployment = await getDeployments(hre.network, taskArgs.mainnet ? ChainStage.MAINNET : ChainStage.TESTNET)
+      const deployment = await getDeployments(hre.network)
       const votingAddress = deployment.voting
       const voting = await hre.ethers.getContractAt("Voting", votingAddress);
       try {

@@ -20,7 +20,7 @@ task("TASK_SEND_BALANCE_QUERY", "send balance query")
     "", types.string)
   .setAction(
     async (taskArgs, hre): Promise<null> => {
-      const deployment = await getDeployments(hre.network, taskArgs.mainnet ? ChainStage.MAINNET : ChainStage.TESTNET)
+      const deployment = await getDeployments(hre.network)
       const balanceQuery = await hre.ethers.getContractAt("BalanceQuery", deployment.balance);
       const params: Param[] = JSON.parse(taskArgs.params)
       const queryRequests: QueryType.QueryRequestStruct[] = []
@@ -45,13 +45,11 @@ task("TASK_SEND_BALANCE_QUERY", "send balance query")
 
       console.log(`Query requests: ${JSON.stringify(queryRequests)}`)
 
-      const apiKey = process.env.INFURA_API_KEY || "";
-      const queryAPI = new FutabaQueryAPI(ChainStage.TESTNET, ChainId.MUMBAI, { rpc: `https://polygon-mumbai.infura.io/v3/${apiKey}` })
+      const queryAPI = new FutabaQueryAPI(ChainStage.DEVNET, ChainId.MUMBAI)
 
       console.log(`Estimating fee...`)
       // @ts-ignore
       const fee = await queryAPI.estimateFee(queryRequests)
-      // const fee = parseEther("0.003")
       console.log(`Fee: ${fee}`)
 
       try {
@@ -63,7 +61,7 @@ task("TASK_SEND_BALANCE_QUERY", "send balance query")
 
         console.log(`Waiting for query result...`)
         const queryId = getQueryId(resTx)
-        const futabaGateway = new FutabaGateway(ChainStage.TESTNET, ChainId.MUMBAI, signer)
+        const futabaGateway = new FutabaGateway(ChainStage.DEVNET, ChainId.MUMBAI, signer)
         const { results, response } = await futabaGateway.waitForQueryResult(queryId)
         console.log("Query result is received!")
         console.log(`response: ${response.hash}`)
