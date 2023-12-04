@@ -11,6 +11,23 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
  */
 
 contract LightClientMock is ILightClient {
+    bytes[] public results;
+
+    constructor() {
+        results = new bytes[](2);
+        results[0] = results[0] = abi.encodePacked(
+            uint256(
+                0x0000000000000000000000000000000000000000000000000000000005f5e100
+            )
+        );
+
+        results[1] = abi.encodePacked(
+            uint256(
+                0x00000000000000000000000000000000000000000000000ad78ebc5ac6200000
+            )
+        );
+    }
+
     function requestQuery(
         QueryType.QueryRequest[] memory queries
     ) external override {
@@ -26,7 +43,7 @@ contract LightClientMock is ILightClient {
     function verify(
         bytes memory message
     ) external returns (bool, bytes[] memory) {
-        return (true, new bytes[](0));
+        return (true, results);
     }
 
     function supportsInterface(
@@ -37,5 +54,15 @@ contract LightClientMock is ILightClient {
 
     function getInterfaceId() external pure returns (bytes4) {
         return type(ILightClient).interfaceId;
+    }
+
+    function setBool() external {
+        results = [
+            abi.encodePacked(
+                uint256(
+                    0x0000000000000000000000000000000000000000000000000000000000000001
+                )
+            )
+        ];
     }
 }
