@@ -17,7 +17,7 @@ task("TASK_VOTE", "Create prposal for voting")
         nftAddress = taskArgs["nftaddress"],
         vote = taskArgs["vote"]
 
-      const deployment = await getDeployments(hre.network, taskArgs.mainnet ? ChainStage.MAINNET : ChainStage.TESTNET)
+      const deployment = await getDeployments(hre.network)
       const votingAddress = deployment.voting
       const voting = await hre.ethers.getContractAt("Voting", votingAddress);
       const [owner] = await hre.ethers.getSigners();

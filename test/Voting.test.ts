@@ -60,7 +60,7 @@ describe("Voting", () => {
 
     const encodedQueries = defaultAbiCoder.encode(["address", "tuple(uint32 dstChainId, address to, uint256 height, bytes32 slot)[]", "bytes", "address"], [callBack, queries, message, lightClient])
 
-    const nonce = await gatewayMock.nonce()
+    const nonce = await gatewayMock.getNonce()
     const queryId = keccak256(solidityPack(["bytes", "uint64"], [encodedQueries, nonce]))
 
     await expect(voting.queryNFT(queries, proposalId, vote, { value: parseEther("0.01") })).to.emit(gatewayMock, "Packet").withArgs(owner.address, queryId, encodedQueries, message.toLowerCase(), lightClient, callBack);
@@ -74,7 +74,7 @@ describe("Voting", () => {
 
     const encodedQueries = defaultAbiCoder.encode(["address", "tuple(uint32 dstChainId, address to, uint256 height, bytes32 slot)[]", "bytes", "address"], [callBack, queries, message, lightClient])
 
-    const nonce = await gatewayMock.nonce()
+    const nonce = await gatewayMock.getNonce()
     const queryId = keccak256(solidityPack(["bytes", "uint64"], [encodedQueries, nonce]))
 
     await expect(voting.connect(owner).receiveQuery(queryId, [], queries, message)).to.be.revertedWith("Only gateway can call this function")
@@ -88,7 +88,7 @@ describe("Voting", () => {
 
     const encodedQueries = defaultAbiCoder.encode(["address", "tuple(uint32 dstChainId, address to, uint256 height, bytes32 slot)[]", "bytes", "address"], [callBack, queries, message, lightClient])
 
-    const nonce = await gatewayMock.nonce()
+    const nonce = await gatewayMock.getNonce()
     const queryId = keccak256(solidityPack(["bytes", "uint64"], [encodedQueries, nonce]))
 
     await expect(voting.queryNFT(queries, proposalId, vote, { value: parseEther("0.01") })).to.emit(gatewayMock, "Packet").withArgs(owner.address, queryId, encodedQueries, message.toLowerCase(), lightClient, callBack);

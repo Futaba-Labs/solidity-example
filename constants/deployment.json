@@ -1,10 +1,10 @@
 {
   "mumbai": {
-    "balance": "0x980C6C355CFBb16420e8Af169F7a3F1310090E10",
-    "custom": "0xbc1bbd63D6cff2DC985F1DE0b166aA39F8a86E3C",
-    "voting": "0x462D421c1a174AF3f76C6072123Afb6aA7202F25",
-    "gateway": "0x3fab87824ABbe2DC686ed5CbB032d9c62E2fe179",
-    "light_client": "0xA171Ec7644385e3dcc5A68af62E6c317f210c7b9"
+    "balance": "0xA20c1fA80FFCb4e7bb9ACEC26028Ac1a1492Ec83",
+    "custom": "0xF8b8A0D88E059A59E6862BBd156C6941045B7AB1",
+    "voting": "0x10097F7C86449a2B65a28977d6ff1AF0E121F723",
+    "gateway": "0x01E0698e24fD0ea124ED539Bc8570b68548061C5",
+    "light_client": "0x87bbEfB934B52Dd329f26ccb7B903eEbc4d0c6b8"
   },
   "goerli": { "balance": "", "custom": "", "voting": "" },
   "optimism-goerli": { "balance": "", "custom": "", "voting": "" },

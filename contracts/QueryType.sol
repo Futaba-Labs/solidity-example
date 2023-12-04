@@ -3,7 +3,7 @@ pragma solidity ^0.8.9;
 
 contract QueryType {
     struct QueryRequest {
-        uint32 dstChainId;
+        uint256 dstChainId;
         address to;
         // block height
         uint256 height;

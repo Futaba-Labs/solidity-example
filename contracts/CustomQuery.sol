@@ -91,6 +91,12 @@ contract CustomQuery is IReceiver, Ownable {
         lightClient = _lightClient;
     }
 
+    function supportsInterface(
+        bytes4 interfaceId
+    ) external pure returns (bool) {
+        return interfaceId == type(IReceiver).interfaceId;
+    }
+
     /**
      * @notice checks if request is from gateway
      */

@@ -4,7 +4,7 @@ import { FutabaQueryAPI, ChainStage, ChainId, FutabaGateway, QueryRequest, RPCS,
 import { QueryType } from "../typechain-types/contracts/BalanceQuery";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import ERC20ABI from "./utils/erc20.abi.json";
-import { concat, hexZeroPad, keccak256 } from "ethers/lib/utils";
+import { concat, hexZeroPad, keccak256, parseEther } from "ethers/lib/utils";
 import { BigNumber } from "ethers";
 
 interface Param {
@@ -20,7 +20,7 @@ task("TASK_SEND_BALANCE_QUERY", "send balance query")
     "", types.string)
   .setAction(
     async (taskArgs, hre): Promise<null> => {
-      const deployment = await getDeployments(hre.network, taskArgs.mainnet ? ChainStage.MAINNET : ChainStage.TESTNET)
+      const deployment = await getDeployments(hre.network)
       const balanceQuery = await hre.ethers.getContractAt("BalanceQuery", deployment.balance);
       const params: Param[] = JSON.parse(taskArgs.params)
       const queryRequests: QueryType.QueryRequestStruct[] = []
@@ -33,22 +33,21 @@ task("TASK_SEND_BALANCE_QUERY", "send balance query")
         const decimal = await getDecimals(param, hre)
         decimals.push(decimal)
         const latestBlockNumber = await getLatestBlockNumber(param, hre)
-
         const queryRequest: QueryRequest = {
           dstChainId: param.dstChainId,
           to: param.to,
-          height: latestBlockNumber - 100,
+          height: latestBlockNumber,
           slot: calcBalanceSlot(signer.address, param.slot)
         }
-
         queryRequests.push(queryRequest)
       }
       console.log(`Decimals: ${JSON.stringify(decimals)}`)
 
       console.log(`Query requests: ${JSON.stringify(queryRequests)}`)
 
-      const queryAPI = new FutabaQueryAPI(ChainStage.TESTNET, ChainId.MUMBAI)
+      const queryAPI = new FutabaQueryAPI(ChainStage.DEVNET, ChainId.MUMBAI)
 
+      console.log(`Estimating fee...`)
       // @ts-ignore
       const fee = await queryAPI.estimateFee(queryRequests)
       console.log(`Fee: ${fee}`)
@@ -62,7 +61,7 @@ task("TASK_SEND_BALANCE_QUERY", "send balance query")
 
         console.log(`Waiting for query result...`)
         const queryId = getQueryId(resTx)
-        const futabaGateway = new FutabaGateway(ChainStage.TESTNET, ChainId.MUMBAI, signer)
+        const futabaGateway = new FutabaGateway(ChainStage.DEVNET, ChainId.MUMBAI, signer)
         const { results, response } = await futabaGateway.waitForQueryResult(queryId)
         console.log("Query result is received!")
         console.log(`response: ${response.hash}`)

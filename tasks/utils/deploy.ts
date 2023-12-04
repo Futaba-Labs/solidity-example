@@ -30,14 +30,9 @@ export const deploy = async (hre: HardhatRuntimeEnvironment, contractName: strin
   return targetContract.address
 }
 
-export const getDeployments = async (network: Network, chainStage: ChainStage): Promise<Deployment> => {
+export const getDeployments = async (network: Network): Promise<Deployment> => {
   const data = await fs.promises.readFile(FILE_PATH, 'utf8');
   const deployment = JSON.parse(data.toString())[network.name];
-  const chainKey = getChainKey(network.config.chainId!)
-  const gateway = GATEWAY[chainStage][chainKey]
-  const lightClient = LIGHT_CLIENT[chainStage][chainKey]
-  deployment.gateway = gateway
-  deployment.light_client = lightClient
   return deployment;
 }
 

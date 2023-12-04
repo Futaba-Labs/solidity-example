@@ -1,15 +1,12 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
-import { BalanceQuery, GatewayMock } from "../typechain-types"
-import { ethers } from "hardhat"
+import { BalanceQuery, GatewayMock, LightClientMock } from "../typechain-types"
 import { defaultAbiCoder, formatEther, formatUnits, hexZeroPad, keccak256, parseEther, parseUnits, solidityPack } from "ethers/lib/utils"
 import { expect } from "chai"
-import { BigNumber } from "ethers"
+import { ethers, upgrades } from "hardhat";
 import { QueryType } from "../typechain-types/contracts/mock/GatewayMock"
 
 
 describe("BalanceQuery", () => {
-  // dummy address
-  const lightClient = "0xA171Ec7644385e3dcc5A68af62E6c317f210c7b9"
 
   const queries: QueryType.QueryRequestStruct[] = [
     {
@@ -28,15 +25,20 @@ describe("BalanceQuery", () => {
 
   const decimals = [6, 18]
 
-  let balanceQuery: BalanceQuery, gatewayMock: GatewayMock, owner: SignerWithAddress
+  let balanceQuery: BalanceQuery, gatewayMock: GatewayMock, lightClient: LightClientMock, owner: SignerWithAddress
 
   before(async () => {
     [owner] = await ethers.getSigners()
   })
 
   beforeEach(async () => {
-    gatewayMock = await (await ethers.getContractFactory("GatewayMock")).deploy()
-    balanceQuery = await (await ethers.getContractFactory("BalanceQuery")).deploy(gatewayMock.address, lightClient)
+    const Gateway = await ethers.getContractFactory("GatewayMock")
+    const g = await upgrades.deployProxy(Gateway, [1], { initializer: 'initialize', kind: 'uups' });
+    await g.deployed()
+    gatewayMock = g as GatewayMock
+    lightClient = await (await ethers.getContractFactory("LightClientMock")).deploy()
+    console.log(await lightClient.getInterfaceId())
+    balanceQuery = await (await ethers.getContractFactory("BalanceQuery")).deploy(gatewayMock.address, lightClient.address)
   })
 
   it("sendQuery() - Insufficient fee", async () => {
@@ -47,22 +49,22 @@ describe("BalanceQuery", () => {
     const callBack = balanceQuery.address
     const message = defaultAbiCoder.encode(["uint256[]", "address"], [decimals, owner.address])
 
-    const encodedQueries = defaultAbiCoder.encode(["address", "tuple(uint32 dstChainId, address to, uint256 height, bytes32 slot)[]", "bytes", "address"], [callBack, queries, message, lightClient])
+    const encodedQueries = defaultAbiCoder.encode(["address", "tuple(uint256 dstChainId, address to, uint256 height, bytes32 slot)[]", "bytes", "address"], [callBack, queries, message, lightClient.address])
 
-    const nonce = await gatewayMock.nonce()
-    const queryId = keccak256(solidityPack(["bytes", "uint64"], [encodedQueries, nonce]))
+    const nonce = await gatewayMock.getNonce()
+    const queryId = keccak256(solidityPack(["bytes", "uint256"], [encodedQueries, nonce]))
 
-    await expect(balanceQuery.sendQuery(queries, decimals, { value: parseEther("0.01") })).to.emit(gatewayMock, "Packet").withArgs(owner.address, queryId, encodedQueries, message.toLowerCase(), lightClient, callBack);
+    await expect(balanceQuery.sendQuery(queries, decimals, { value: parseEther("0.01") })).to.emit(gatewayMock, "Packet").withArgs(owner.address, queryId, encodedQueries, message.toLowerCase(), lightClient.address, callBack);
   })
 
   it("receiveQuery() - onlyGateway", async () => {
     const callBack = balanceQuery.address
     const message = defaultAbiCoder.encode(["uint256[]", "address"], [decimals, owner.address])
 
-    const encodedQueries = defaultAbiCoder.encode(["address", "tuple(uint32 dstChainId, address to, uint256 height, bytes32 slot)[]", "bytes", "address"], [callBack, queries, message, lightClient])
+    const encodedQueries = defaultAbiCoder.encode(["address", "tuple(uint256 dstChainId, address to, uint256 height, bytes32 slot)[]", "bytes", "address"], [callBack, queries, message, lightClient.address])
 
-    const nonce = await gatewayMock.nonce()
-    const queryId = keccak256(solidityPack(["bytes", "uint64"], [encodedQueries, nonce]))
+    const nonce = await gatewayMock.getNonce()
+    const queryId = keccak256(solidityPack(["bytes", "uint256"], [encodedQueries, nonce]))
 
     await expect(balanceQuery.connect(owner).receiveQuery(queryId, [], queries, message)).to.be.revertedWith("Only gateway can call this function")
   })
@@ -71,11 +73,11 @@ describe("BalanceQuery", () => {
     const callBack = balanceQuery.address
     const message = defaultAbiCoder.encode(["uint256[]", "address"], [decimals, owner.address])
 
-    const encodedQueries = defaultAbiCoder.encode(["address", "tuple(uint32 dstChainId, address to, uint256 height, bytes32 slot)[]", "bytes", "address"], [callBack, queries, message, lightClient])
+    const encodedQueries = defaultAbiCoder.encode(["address", "tuple(uint256 dstChainId, address to, uint256 height, bytes32 slot)[]", "bytes", "address"], [callBack, queries, message, lightClient.address])
 
-    const nonce = await gatewayMock.nonce()
-    const queryId = keccak256(solidityPack(["bytes", "uint64"], [encodedQueries, nonce]))
-    await expect(balanceQuery.sendQuery(queries, decimals, { value: parseEther("0.01") })).to.emit(gatewayMock, "Packet").withArgs(owner.address, queryId, encodedQueries, message.toLowerCase(), lightClient, callBack);
+    const nonce = await gatewayMock.getNonce()
+    const queryId = keccak256(solidityPack(["bytes", "uint256"], [encodedQueries, nonce]))
+    await expect(balanceQuery.sendQuery(queries, decimals, { value: parseEther("0.01") })).to.emit(gatewayMock, "Packet").withArgs(owner.address, queryId, encodedQueries, message.toLowerCase(), lightClient.address, callBack);
 
     const balances = [hexZeroPad(parseUnits(formatUnits("100", 6), 12).toHexString(), 32), hexZeroPad(parseEther("200").toHexString(), 32)]
     const encodedBalances = defaultAbiCoder.encode(["bytes[]"], [balances])
@@ -85,15 +87,15 @@ describe("BalanceQuery", () => {
       proof: encodedBalances
     }
 
-    const storeKey1 = keccak256(solidityPack(["uint32", "address", "bytes32"], [queries[0].dstChainId, queries[0].to, queries[0].slot]))
-    const storeKey2 = keccak256(solidityPack(["uint32", "address", "bytes32"], [queries[1].dstChainId, queries[1].to, queries[1].slot]))
+    const storeKey1 = keccak256(solidityPack(["uint256", "address", "bytes32"], [queries[0].dstChainId, queries[0].to, queries[0].slot]))
+    const storeKey2 = keccak256(solidityPack(["uint256", "address", "bytes32"], [queries[1].dstChainId, queries[1].to, queries[1].slot]))
 
     const oldBalance = await balanceQuery.balanceOf(owner.address)
 
     await expect(gatewayMock.connect(owner).receiveQuery(queryResponse))
       .to.emit(gatewayMock, "SaveQueryData").withArgs(storeKey1, queries[0].height, balances[0])
       .to.emit(gatewayMock, "SaveQueryData").withArgs(storeKey2, queries[1].height, balances[1])
-      .to.emit(gatewayMock, "ReceiveQuery").withArgs(queryId, message.toLowerCase(), lightClient, callBack, balances)
+      .to.emit(gatewayMock, "ReceiveQuery").withArgs(queryId, message.toLowerCase(), lightClient.address, callBack, balances)
 
     const newBalance = await balanceQuery.balanceOf(owner.address)
     expect(newBalance).to.eq(parseEther("300"))
