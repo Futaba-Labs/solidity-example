@@ -1,20 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import "../QueryType.sol";
+import {QueryType} from "../QueryType.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 /**
  * @title Receiver interface
- * @notice This interface is for the user to receive the results of the query
- * @notice NOT AUDITED
+ * @dev This interface is for the user to receive the results of the query
  */
-interface IReceiver {
-    /**
-     * @notice This function is used to receive the results of the query
-     * @param results The results of the query
-     * @param queries The query data
-     * @param message Data to be used in the callback sent at the time of the request
-     */
+interface IReceiver is IERC165 {
     function receiveQuery(
         bytes32 queryId,
         bytes[] memory results,

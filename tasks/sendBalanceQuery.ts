@@ -4,7 +4,7 @@ import { FutabaQueryAPI, ChainStage, ChainId, FutabaGateway, QueryRequest, RPCS,
 import { QueryType } from "../typechain-types/contracts/BalanceQuery";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import ERC20ABI from "./utils/erc20.abi.json";
-import { concat, hexZeroPad, keccak256 } from "ethers/lib/utils";
+import { concat, hexZeroPad, keccak256, parseEther } from "ethers/lib/utils";
 import { BigNumber } from "ethers";
 
 interface Param {
@@ -45,10 +45,13 @@ task("TASK_SEND_BALANCE_QUERY", "send balance query")
 
       console.log(`Query requests: ${JSON.stringify(queryRequests)}`)
 
-      const queryAPI = new FutabaQueryAPI(ChainStage.TESTNET, ChainId.MUMBAI)
+      const apiKey = process.env.INFURA_API_KEY || "";
+      const queryAPI = new FutabaQueryAPI(ChainStage.TESTNET, ChainId.MUMBAI, { rpc: `https://polygon-mumbai.infura.io/v3/${apiKey}` })
 
+      console.log(`Estimating fee...`)
       // @ts-ignore
       const fee = await queryAPI.estimateFee(queryRequests)
+      // const fee = parseEther("0.003")
       console.log(`Fee: ${fee}`)
 
       try {

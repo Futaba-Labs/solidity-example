@@ -97,6 +97,12 @@ contract BalanceQuery is Ownable, ERC20, IReceiver {
         lightClient = _lightClient;
     }
 
+    function supportsInterface(
+        bytes4 interfaceId
+    ) external pure returns (bool) {
+        return interfaceId == type(IReceiver).interfaceId;
+    }
+
     /** @notice Allow data to be received only from gateway contract
      */
     modifier onlyGateway() {

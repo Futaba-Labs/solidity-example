@@ -385,6 +385,12 @@ contract Voting is Ownable, IReceiver {
         return (Proposals[_ProposalID].voterInfo[_user].hasVoted);
     }
 
+    function supportsInterface(
+        bytes4 interfaceId
+    ) external pure returns (bool) {
+        return interfaceId == type(IReceiver).interfaceId;
+    }
+
     /**
      * @dev checks if a proposal id is valid
      * @param _ProposalID the proposal id

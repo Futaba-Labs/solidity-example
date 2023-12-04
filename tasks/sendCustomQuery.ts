@@ -3,6 +3,7 @@ import { getDeployments } from "./utils/deploy";
 import { QueryType } from "../typechain-types/contracts/CustomQuery";
 import { ChainId, ChainStage, FutabaGateway, FutabaQueryAPI } from "@futaba-lab/sdk";
 import { getQueryId } from "./utils";
+import { parseEther } from "ethers/lib/utils";
 
 task("TASK_SEND_CUSTOM_QUERY", "send custom query")
   .addParam<boolean>("mainnet", "mainnet", false, types.boolean)
@@ -18,7 +19,8 @@ task("TASK_SEND_CUSTOM_QUERY", "send custom query")
       const queryAPI = new FutabaQueryAPI(ChainStage.TESTNET, ChainId.MUMBAI)
 
       // @ts-ignore
-      const fee = await queryAPI.estimateFee(queryRequests)
+      // const fee = await queryAPI.estimateFee(queryRequests)
+      const fee = parseEther("0.003")
       console.log(`Fee: ${fee}`)
 
       try {
@@ -37,6 +39,7 @@ task("TASK_SEND_CUSTOM_QUERY", "send custom query")
         console.log(`response: ${response.hash}`)
         console.log(`result: ${JSON.stringify(results)}`)
       } catch (e: any) {
+        console.log(e)
         if (e.error.message.includes("The chainId + address is already trusted")) {
           console.log("*source already set*")
         } else {

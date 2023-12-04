@@ -8,8 +8,8 @@ task("TASK_DEPLOY_BALANCE_QUERY", "Deploy BalanceQuery contract")
   .setAction(
     async (taskArgs, hre): Promise<null> => {
       const deployment = await getDeployments(hre.network, taskArgs.mainnet ? ChainStage.MAINNET : ChainStage.TESTNET)
-      const gateway = deployment.gateway
-      const lightClient = deployment.light_client
+      const gateway = "0x098A0579Ff42523FFB3B4FBd3582A769eE5556Df"
+      const lightClient = "0x53957A049DE3c5FAFa9DD2EaF63961A0bBdCA352"
 
       const deployedAddress = await deploy(hre, "BalanceQuery", [gateway, lightClient], taskArgs.verify)
       deployment.balance = deployedAddress
