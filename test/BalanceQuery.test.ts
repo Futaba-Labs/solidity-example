@@ -37,7 +37,6 @@ describe("BalanceQuery", () => {
     await g.deployed()
     gatewayMock = g as GatewayMock
     lightClient = await (await ethers.getContractFactory("LightClientMock")).deploy()
-    console.log(await lightClient.getInterfaceId())
     balanceQuery = await (await ethers.getContractFactory("BalanceQuery")).deploy(gatewayMock.address, lightClient.address)
   })
 
@@ -89,8 +88,6 @@ describe("BalanceQuery", () => {
 
     const storeKey1 = keccak256(solidityPack(["uint256", "address", "bytes32"], [queries[0].dstChainId, queries[0].to, queries[0].slot]))
     const storeKey2 = keccak256(solidityPack(["uint256", "address", "bytes32"], [queries[1].dstChainId, queries[1].to, queries[1].slot]))
-
-    const oldBalance = await balanceQuery.balanceOf(owner.address)
 
     await expect(gatewayMock.connect(owner).receiveQuery(queryResponse))
       .to.emit(gatewayMock, "SaveQueryData").withArgs(storeKey1, queries[0].height, balances[0])

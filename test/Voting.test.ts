@@ -1,15 +1,12 @@
 import { defaultAbiCoder } from "@ethersproject/abi"
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers"
 import { expect } from "chai"
-import { ethers } from "hardhat"
+import { ethers, upgrades } from "hardhat"
 import { hexZeroPad, keccak256, solidityPack, parseEther, parseUnits, formatUnits } from "ethers/lib/utils"
-import { BalanceQuery, GatewayMock, Voting } from "../typechain-types"
+import { BalanceQuery, GatewayMock, LightClientMock, Voting } from "../typechain-types"
 import { QueryType } from "../typechain-types/contracts/mock/GatewayMock"
 
 describe("Voting", () => {
-  // dummy address
-  const lightClient = "0xA171Ec7644385e3dcc5A68af62E6c317f210c7b9"
-
   const queries: QueryType.QueryRequestStruct[] = [
     {
       dstChainId: 1,
@@ -26,15 +23,19 @@ describe("Voting", () => {
   const vote = true
   const proposalId = 1
 
-  let voting: Voting, gatewayMock: GatewayMock, owner: SignerWithAddress
+  let voting: Voting, gatewayMock: GatewayMock, lightClient: LightClientMock, owner: SignerWithAddress
 
   before(async () => {
     [owner] = await ethers.getSigners()
   })
 
   beforeEach(async () => {
-    gatewayMock = await (await ethers.getContractFactory("GatewayMock")).deploy()
-    voting = await (await ethers.getContractFactory("Voting")).deploy(gatewayMock.address, lightClient)
+    const Gateway = await ethers.getContractFactory("GatewayMock")
+    const g = await upgrades.deployProxy(Gateway, [1], { initializer: 'initialize', kind: 'uups' });
+    await g.deployed()
+    gatewayMock = g as GatewayMock
+    lightClient = await (await ethers.getContractFactory("LightClientMock")).deploy()
+    voting = await (await ethers.getContractFactory("Voting")).deploy(gatewayMock.address, lightClient.address)
   })
 
   it("createProposal() - Zero expiration time", async () => {
@@ -58,12 +59,12 @@ describe("Voting", () => {
     const callBack = voting.address
     const message = defaultAbiCoder.encode(["address", "uint256", "bool"], [owner.address, proposalId, vote])
 
-    const encodedQueries = defaultAbiCoder.encode(["address", "tuple(uint32 dstChainId, address to, uint256 height, bytes32 slot)[]", "bytes", "address"], [callBack, queries, message, lightClient])
+    const encodedQueries = defaultAbiCoder.encode(["address", "tuple(uint256 dstChainId, address to, uint256 height, bytes32 slot)[]", "bytes", "address"], [callBack, queries, message, lightClient.address])
 
     const nonce = await gatewayMock.getNonce()
-    const queryId = keccak256(solidityPack(["bytes", "uint64"], [encodedQueries, nonce]))
+    const queryId = keccak256(solidityPack(["bytes", "uint256"], [encodedQueries, nonce]))
 
-    await expect(voting.queryNFT(queries, proposalId, vote, { value: parseEther("0.01") })).to.emit(gatewayMock, "Packet").withArgs(owner.address, queryId, encodedQueries, message.toLowerCase(), lightClient, callBack);
+    await expect(voting.queryNFT(queries, proposalId, vote, { value: parseEther("0.01") })).to.emit(gatewayMock, "Packet").withArgs(owner.address, queryId, encodedQueries, message.toLowerCase(), lightClient.address, callBack);
   })
 
   it("receiveQuery() - onlyGateway", async () => {
@@ -72,10 +73,10 @@ describe("Voting", () => {
     const callBack = voting.address
     const message = defaultAbiCoder.encode(["address", "uint256", "bool"], [owner.address, proposalId, vote])
 
-    const encodedQueries = defaultAbiCoder.encode(["address", "tuple(uint32 dstChainId, address to, uint256 height, bytes32 slot)[]", "bytes", "address"], [callBack, queries, message, lightClient])
+    const encodedQueries = defaultAbiCoder.encode(["address", "tuple(uint256 dstChainId, address to, uint256 height, bytes32 slot)[]", "bytes", "address"], [callBack, queries, message, lightClient.address])
 
     const nonce = await gatewayMock.getNonce()
-    const queryId = keccak256(solidityPack(["bytes", "uint64"], [encodedQueries, nonce]))
+    const queryId = keccak256(solidityPack(["bytes", "uint256"], [encodedQueries, nonce]))
 
     await expect(voting.connect(owner).receiveQuery(queryId, [], queries, message)).to.be.revertedWith("Only gateway can call this function")
   })
@@ -86,14 +87,15 @@ describe("Voting", () => {
     const callBack = voting.address
     const message = defaultAbiCoder.encode(["address", "uint256", "bool"], [owner.address, proposalId, vote])
 
-    const encodedQueries = defaultAbiCoder.encode(["address", "tuple(uint32 dstChainId, address to, uint256 height, bytes32 slot)[]", "bytes", "address"], [callBack, queries, message, lightClient])
+    const encodedQueries = defaultAbiCoder.encode(["address", "tuple(uint256 dstChainId, address to, uint256 height, bytes32 slot)[]", "bytes", "address"], [callBack, queries, message, lightClient.address])
 
     const nonce = await gatewayMock.getNonce()
-    const queryId = keccak256(solidityPack(["bytes", "uint64"], [encodedQueries, nonce]))
+    const queryId = keccak256(solidityPack(["bytes", "uint256"], [encodedQueries, nonce]))
 
-    await expect(voting.queryNFT(queries, proposalId, vote, { value: parseEther("0.01") })).to.emit(gatewayMock, "Packet").withArgs(owner.address, queryId, encodedQueries, message.toLowerCase(), lightClient, callBack);
+    await expect(voting.queryNFT(queries, proposalId, vote, { value: parseEther("0.01") })).to.emit(gatewayMock, "Packet").withArgs(owner.address, queryId, encodedQueries, message.toLowerCase(), lightClient.address, callBack);
 
     const results = [hexZeroPad("0x1", 32)]
+    await (await lightClient.setBool()).wait()
     const encodedBalances = defaultAbiCoder.encode(["bytes[]"], [results])
 
     const queryResponse: QueryType.QueryResponseStruct = {
@@ -101,11 +103,11 @@ describe("Voting", () => {
       proof: encodedBalances
     }
 
-    const storeKey1 = keccak256(solidityPack(["uint32", "address", "bytes32"], [queries[0].dstChainId, queries[0].to, queries[0].slot]))
+    const storeKey1 = keccak256(solidityPack(["uint256", "address", "bytes32"], [queries[0].dstChainId, queries[0].to, queries[0].slot]))
 
     await expect(gatewayMock.connect(owner).receiveQuery(queryResponse))
       .to.emit(gatewayMock, "SaveQueryData").withArgs(storeKey1, queries[0].height, results[0])
-      .to.emit(gatewayMock, "ReceiveQuery").withArgs(queryId, message.toLowerCase(), lightClient, callBack, results)
+      .to.emit(gatewayMock, "ReceiveQuery").withArgs(queryId, message.toLowerCase(), lightClient.address, callBack, results)
       .to.emit(voting, "VoteCasted").withArgs(owner.address, proposalId, 1)
 
     const proposal = await voting.getProposal(proposalId)
