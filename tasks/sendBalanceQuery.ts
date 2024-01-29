@@ -6,6 +6,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import ERC20ABI from "./utils/erc20.abi.json";
 import { concat, hexZeroPad, keccak256, parseEther } from "ethers/lib/utils";
 import { BigNumber } from "ethers";
+import GATEWAY_ABI from "../constants/gateway.abi.json"
 
 interface Param {
   dstChainId: number,
@@ -16,7 +17,7 @@ interface Param {
 task("TASK_SEND_BALANCE_QUERY", "send balance query")
   .addParam<boolean>("mainnet", "mainnet", false, types.boolean)
   .addParam<string>("params",
-    'Parameters for requesting query\nExample: [{dstChainId: 5, to: "0xA2025B15a1757311bfD68cb14eaeFCc237AF5b43"}]',
+    'Parameters for requesting query\nExample: [{dstChainId: 5, to: "0xA2025B15a1757311bfD68cb14eaeFCc237AF5b43", "slot: 0x0"}]',
     "", types.string)
   .setAction(
     async (taskArgs, hre): Promise<null> => {
@@ -25,10 +26,16 @@ task("TASK_SEND_BALANCE_QUERY", "send balance query")
       const params: Param[] = JSON.parse(taskArgs.params)
       const queryRequests: QueryType.QueryRequestStruct[] = []
 
+      const [signer] = await hre.ethers.getSigners()
+
+      const gateway = new hre.ethers.Contract(
+        deployment.gateway,
+        GATEWAY_ABI,
+        signer
+      );
+
       console.log("Formatting query requests...")
       const decimals: number[] = []
-      const [signer] = await hre.ethers.getSigners()
-      console.log(`Signer: ${signer.address}`)
       for (const param of params) {
         const decimal = await getDecimals(param, hre)
         decimals.push(decimal)
@@ -45,16 +52,14 @@ task("TASK_SEND_BALANCE_QUERY", "send balance query")
 
       console.log(`Query requests: ${JSON.stringify(queryRequests)}`)
 
-      const queryAPI = new FutabaQueryAPI(ChainStage.DEVNET, ChainId.MUMBAI)
-
       console.log(`Estimating fee...`)
       // @ts-ignore
-      const fee = await queryAPI.estimateFee(queryRequests)
+      const fee = await gateway.estimateFee(deployment.light_client, queryRequests)
       console.log(`Fee: ${fee}`)
 
       try {
         console.log(`Sending query...`)
-        const tx = await balanceQuery.sendQuery(queryRequests, decimals, { gasLimit: 3000000, value: fee })
+        const tx = await balanceQuery.sendQuery(queryRequests, decimals, { gasLimit: 3000000, value: fee.mul(120).div(100) })
         const resTx = await tx.wait()
         console.log("Query sent!")
         console.log(`tx: ${tx.hash}`)

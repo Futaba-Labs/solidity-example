@@ -1,8 +1,7 @@
 import { task, types } from "hardhat/config";
 import { getDeployments } from "./utils";
-import { ChainStage } from "@futaba-lab/sdk";
 
-task("TASK_SET_LIGHT_CLIENT", "Set gateway contract address")
+task("TASK_SET_LIGHT_CLIENT", "Set light client contract address")
   .addParam<boolean>("mainnet", "mainnet", false, types.boolean)
   .addParam<string>("client", "LightClient contract address", "", types.string)
   .setAction(
@@ -16,16 +15,16 @@ task("TASK_SET_LIGHT_CLIENT", "Set gateway contract address")
       const customQuery = await hre.ethers.getContractAt("CustomQuery", deployment.custom)
       const voting = await hre.ethers.getContractAt("Voting", deployment.voting)
       try {
-        console.log(`Set gateway on BalanceQuery...`)
+        console.log(`Set light client on BalanceQuery...`)
         let tx = await (await balanceQuery.setLightClient(lightClient, { gasLimit: 2000000 })).wait()
         console.log(`tx: ${tx.transactionHash}`)
-        console.log("Set gateway on CustomQuery...")
+        console.log("Set light client on CustomQuery...")
         tx = await (await customQuery.setLightClient(lightClient, { gasLimit: 2000000 })).wait()
         console.log(`tx: ${tx.transactionHash}`)
-        console.log("Set gateway on Voting...")
+        console.log("Set light client on Voting...")
         tx = await (await voting.setLightClient(lightClient, { gasLimit: 2000000 })).wait()
         console.log(`tx: ${tx.transactionHash}`)
-        console.log(`✅ [${hre.network.name}] setGateway(${lightClient})`)
+        console.log(`✅ [${hre.network.name}] setLightClient(${lightClient})`)
       } catch (e: any) {
         if (e.error.message.includes("The chainId + address is already trusted")) {
           console.log("*source already set*")

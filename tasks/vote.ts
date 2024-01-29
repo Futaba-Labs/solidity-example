@@ -1,10 +1,8 @@
 import { task, types } from "hardhat/config";
 import { QueryType } from "../typechain-types/contracts/cross-chain-voting/Voting";
-import { GelatoRelay } from "@gelatonetwork/relay-sdk";
 import { getDeployments, getQueryId } from "./utils";
 import { ChainId, ChainStage, FutabaGateway } from "@futaba-lab/sdk";
-
-const relay = new GelatoRelay();
+import GATEWAY_ABI from "../constants/gateway.abi.json"
 
 task("TASK_VOTE", "Create prposal for voting")
   .addParam<boolean>("mainnet", "mainnet", false, types.boolean)
@@ -27,10 +25,22 @@ task("TASK_VOTE", "Create prposal for voting")
             0, slot: hre.ethers.utils.keccak256(hre.ethers.utils.concat([hre.ethers.utils.hexZeroPad(owner.address, 32), hre.ethers.utils.hexZeroPad(hre.ethers.BigNumber.from(3).toHexString(), 32),]))
         }
       ]
+
+      console.log(`Query requests: ${JSON.stringify(queries)}`)
+
+      const [signer] = await hre.ethers.getSigners()
+      const gateway = new hre.ethers.Contract(
+        deployment.gateway,
+        GATEWAY_ABI,
+        signer
+      );
+      console.log(`Estimating fee...`)
+      const fee = await gateway.estimateFee(deployment.light_client, queries)
+      console.log(`Fee: ${fee}`)
+
       try {
-        console.log("voting...")
-        const fee = await relay.getEstimatedFee(80001, "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", hre.ethers.BigNumber.from("1000000"), true)
-        const tx = await (await voting.queryNFT(queries, prposalId, vote, { gasLimit: 1000000, value: fee })).wait()
+        console.log("Voting...")
+        const tx = await (await voting.queryNFT(queries, prposalId, vote, { gasLimit: 3000000, value: fee })).wait()
         console.log(`✅ [${hre.network.name}] queryNFT(${queries}, ${prposalId}, ${vote})`)
         console.log(` tx: ${tx.transactionHash} `)
 
@@ -41,6 +51,7 @@ task("TASK_VOTE", "Create prposal for voting")
         console.log("Query result is received!")
 
       } catch (e: any) {
+        console.log(e)
         if (e.error.message.includes("The chainId + address is already trusted")) {
           console.log("*source already set*")
         } else {

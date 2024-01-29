@@ -1,9 +1,9 @@
 import { task, types } from "hardhat/config";
 import { getDeployments } from "./utils/deploy";
 import { QueryType } from "../typechain-types/contracts/CustomQuery";
-import { ChainId, ChainStage, FutabaGateway, FutabaQueryAPI } from "@futaba-lab/sdk";
+import { ChainId, ChainStage, FutabaGateway } from "@futaba-lab/sdk";
 import { getQueryId } from "./utils";
-import { parseEther } from "ethers/lib/utils";
+import GATEWAY_ABI from "../constants/gateway.abi.json"
 
 task("TASK_SEND_CUSTOM_QUERY", "send custom query")
   .addParam<boolean>("mainnet", "mainnet", false, types.boolean)
@@ -16,23 +16,28 @@ task("TASK_SEND_CUSTOM_QUERY", "send custom query")
       const customQuery = await hre.ethers.getContractAt("CustomQuery", deployment.custom);
       const queryRequests: QueryType.QueryRequestStruct[] = JSON.parse(taskArgs.params)
 
-      const queryAPI = new FutabaQueryAPI(ChainStage.TESTNET, ChainId.MUMBAI)
+      console.log(`Query requests: ${JSON.stringify(queryRequests)}`)
 
-      // @ts-ignore
-      // const fee = await queryAPI.estimateFee(queryRequests)
-      const fee = parseEther("0.003")
+      const [signer] = await hre.ethers.getSigners()
+      const gateway = new hre.ethers.Contract(
+        deployment.gateway,
+        GATEWAY_ABI,
+        signer
+      );
+
+      console.log(`Estimating fee...`)
+      const fee = await gateway.estimateFee(deployment.light_client, queryRequests)
       console.log(`Fee: ${fee}`)
 
       try {
         console.log(`Sending query...`)
-        const tx = await customQuery.query(queryRequests, { gasLimit: 1000000, value: fee })
+        const tx = await customQuery.query(queryRequests, { gasLimit: 3000000, value: fee })
         const resTx = await tx.wait()
         console.log("Query sent!")
         console.log(`tx: ${tx.hash}`)
 
         console.log(`Waiting for query result...`)
         const queryId = getQueryId(resTx)
-        const [signer] = await hre.ethers.getSigners()
         const futabaGateway = new FutabaGateway(ChainStage.TESTNET, ChainId.MUMBAI, signer)
         const { results, response } = await futabaGateway.waitForQueryResult(queryId)
         console.log("Query result is received!")
